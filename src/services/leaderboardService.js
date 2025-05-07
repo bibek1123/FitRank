@@ -5,19 +5,17 @@ import Activity from '../models/activity.js'
 
 const getLeaderboard = async (search) => {
     try {
-        const whereCondition = {};
+        let searchUserId = null;
 
         if (search) {
-            const userId = parseInt(search, 10);
-            if (isNaN(userId)) {
+            searchUserId = parseInt(search, 10);
+            if (isNaN(searchUserId)) {
                 logger.error('Invalid search value. Must be a numeric user ID.')
                 throw new Error('Invalid search value. Must be a numeric user ID.');
             }
-            whereCondition.user_id = userId;
         }
 
         const leaderboardData = await Leaderboard.findAll({
-            where: whereCondition,
             include: {
                 model: User,
                 attributes: ['id', 'full_name'],
@@ -25,16 +23,20 @@ const getLeaderboard = async (search) => {
             order: [['rank', 'ASC']],
         });
 
-        if (search && leaderboardData.length > 0) {
-            const [searchedUser] = leaderboardData;
-            return [searchedUser, ...leaderboardData.filter(u => u.user_id !== searchedUser.user_id)];
+        if (searchUserId) {
+            const index = leaderboardData.findIndex(item => item.user_id === searchUserId);
+            if (index !== -1) {
+                const searchedUser = leaderboardData[index];
+                leaderboardData.splice(index, 1);
+                leaderboardData.unshift(searchedUser);
+            }
         }
 
         return leaderboardData;
 
     } catch (err) {
         logger.error(`Error in getLeaderboard: ${err.message}`);
-        throw new Error('Failed to retrieve leaderboard');
+        throw new Error(`Failed to retrieve leaderboard: ${err.message}`);
     }
 };
 
@@ -131,8 +133,9 @@ const recalculateRanks = async (filter) => {
         return updatedLeaderboard;
 
     } catch (err) {
+        console.log(err.message, 'dd')
         logger.error(`Error in recalculateRanks: ${err.message}`);
-        throw new Error('Failed to recalculate ranks');
+        throw new Error(`Failed to recalculate ranks: ${err.message}`);
     }
 };
 

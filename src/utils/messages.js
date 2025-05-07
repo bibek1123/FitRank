@@ -1,6 +1,7 @@
 import {
     success,
     badRequest,
+    internalServerError
   } from "./responseCode.js";
   import { RESPONSE_CODE } from "../config/constants/responseCodeConstant.js";
   
