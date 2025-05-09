@@ -1,5 +1,5 @@
 
-# Leaderboard API
+# FitRank - Leaderboard API
 
 This API provides functionality for recalculating the leaderboard ranks based on user activities and retrieving the current leaderboard data.
 
